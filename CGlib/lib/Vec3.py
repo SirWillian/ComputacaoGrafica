@@ -3,9 +3,11 @@ from math import acos, degrees
 
 class Vec3(object):
     def __init__(self, x, y, z=0):
-        self.coordinates=np.array([x,y,z])
+        self.coordinates=np.array([x,y,z], dtype=np.float32)
 
     def __add__(self, vector):
+        if(type(vector)!=Vec3):
+            raise TypeError('Second operand must be of type Vec3')
         return Vec3(*(self.coordinates + vector.coordinates))
 
     def __sub__(self, vector):

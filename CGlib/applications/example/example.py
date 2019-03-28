@@ -1,18 +1,7 @@
 from glfw import *
 import numpy as np
 from OpenGL.arrays import ArrayDatatype
-from OpenGL.GL import (GL_ARRAY_BUFFER, GL_COLOR_BUFFER_BIT,
-    GL_COMPILE_STATUS, GL_FALSE, GL_FLOAT, GL_FRAGMENT_SHADER,
-    GL_LINK_STATUS, GL_RENDERER, GL_SHADING_LANGUAGE_VERSION,
-    GL_STATIC_DRAW, GL_TRIANGLES, GL_TRUE, GL_VENDOR, GL_VERSION,
-    GL_VERTEX_SHADER, glAttachShader, glBindBuffer, glBindVertexArray,
-    glBufferData, glClear, glClearColor, glCompileShader,
-    glCreateProgram, glCreateShader, glDeleteProgram,
-    glDeleteShader, glDrawArrays, glEnableVertexAttribArray,
-    glGenBuffers, glGenVertexArrays, glGetAttribLocation,
-    glGetProgramInfoLog, glGetProgramiv, glGetShaderInfoLog,
-    glGetShaderiv, glGetString, glGetUniformLocation, glLinkProgram,
-    glShaderSource, glUseProgram, glVertexAttribPointer)
+from OpenGL.GL import *
 import sys
 sys.path.append('../../lib')
 
@@ -21,28 +10,8 @@ from Point import Point
 from ShaderProgram import ShaderProgram
 
 
-vertex = """
-#version 330
-in vec3 vin_position;
-in vec3 vin_color;
-out vec3 vout_color;
-void main(void)
-{
-    vout_color = vin_color;
-    gl_Position = vec4(vin_position, 1.0);
-}
-"""
-
-
-fragment = """
-#version 330
-in vec3 vout_color;
-out vec4 fout_color;
-void main(void)
-{
-    fout_color = vec4(vout_color, 1.0);
-}
-"""
+vertex_shader = open("simple.vert").read()
+fragment_shader = open("simple.frag").read()
 
 vertex_data = np.array([0.75, 0.75, 0.0,
                         0.75, -0.75, 0.0,
@@ -64,7 +33,9 @@ def data_init():
     # Lets compile our shaders since the use of shaders is now
     # mandatory. We need at least a vertex and fragment shader
     # begore we can draw anything
-    program = ShaderProgram(fragment=fragment, vertex=vertex)
+    print(vertex_shader)
+    print(fragment_shader)
+    program = ShaderProgram(fragment=fragment_shader, vertex=vertex_shader)
 
     # Lets create a VAO and bind it
     # Think of VAO's as object that encapsulate buffer state
@@ -84,18 +55,19 @@ def data_init():
     vertex_data3=np.array([point.coordinates for point in vertex_data2],dtype=np.float32).ravel()
     glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(vertex_data3), vertex_data3, GL_STATIC_DRAW)
 
-    # Now specify how the shader program will be receiving this data
-    # In this case the data from this buffer will be available in the shader as the vin_position vertex attribute
-    glVertexAttribPointer(program.attribute_location('vin_position'), 3, GL_FLOAT, GL_FALSE, 0, None)
-
+    pos_attrib = program.attribute_location('vPosition')
     # Turn on this vertex attribute in the shader
-    glEnableVertexAttribArray(0)
+    glEnableVertexAttribArray(pos_attrib)
+    # Now specify how the shader program will be receiving this data
+    # In this case the data from this buffer will be available in the shader as the vPosition vertex attribute
+    glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, None)
 
     # Now do the same for the other vertex buffer
+    color_attrib = program.attribute_location('vInColor')
+    glEnableVertexAttribArray(color_attrib)
     glBindBuffer(GL_ARRAY_BUFFER, vbo_id[1])
     glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(color_data), color_data, GL_STATIC_DRAW)
-    glVertexAttribPointer(program.attribute_location('vin_color'), 3, GL_FLOAT, GL_FALSE, 0, None)
-    glEnableVertexAttribArray(1)
+    glVertexAttribPointer(color_attrib, 3, GL_FLOAT, GL_FALSE, 0, None)
 
     # Lets unbind our vbo and vao state
     # We will bind these again in the draw loop
@@ -136,7 +108,7 @@ if __name__ == "__main__":
     print ('GLSL Version: %s' % (glGetString(GL_SHADING_LANGUAGE_VERSION)))
     print ('Renderer: %s' % (glGetString(GL_RENDERER)))
 
-    glClearColor(0.0, 1.0, 0.0, 0)
+    glClearColor(0.0, 0.0, 0.0, 0)
 
     vao_id, vbo_id, program = data_init()
 
