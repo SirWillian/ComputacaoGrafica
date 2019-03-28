@@ -1,7 +1,7 @@
-from glfw import *
 import numpy as np
 from OpenGL.arrays import ArrayDatatype
 from OpenGL.GL import *
+from OpenGL.GLUT import *
 import sys
 sys.path.append('../../lib')
 
@@ -9,7 +9,7 @@ from Vec3 import Vec3
 from Point import Point
 from ShaderProgram import ShaderProgram
 
-SCREEN_SIZE = 800
+WINDOW_SIZE = 512
 
 vertex_shader = open("simple.vert").read()
 fragment_shader = open("simple.frag").read()
@@ -19,15 +19,13 @@ vbo_id = 0
 point_data = [Point(0,0,0)]*3
 click_count = 0
 
-def mouse_callback(window, button, action, mods):
-    if(button==MOUSE_BUTTON_1 and action==PRESS):
-        xc, yc = get_cursor_pos(window)
-
+def mouse_callback(button, state, xc, yc):
+    if(button==GLUT_LEFT_BUTTON and state==GLUT_DOWN):
         global click_count, point_data
         if(click_count < 3):
             print("Click on "+str(xc)+" "+str(yc))
-            x = 2*xc/SCREEN_SIZE - 1
-            y = (-2*yc/SCREEN_SIZE + 1)
+            x = 2*xc/WINDOW_SIZE - 1
+            y = (-2*yc/WINDOW_SIZE + 1)
             print("OpenGL Coordinates: "+str(x)+" "+str(y))
             
             point_data[click_count]=Point(x,y)
@@ -56,7 +54,18 @@ def mouse_callback(window, button, action, mods):
             glBindBuffer(GL_ARRAY_BUFFER, vbo_id)
             glBufferData(GL_ARRAY_BUFFER, 12*4, None, GL_STATIC_DRAW)
         
-    
+def display():
+    glClear(GL_COLOR_BUFFER_BIT)
+        
+    glBindVertexArray(vao_id)
+    #if(click_count<3):
+    #    glDrawArrays(GL_POINTS, 0, click_count)
+    #else:
+    #    glDrawArrays(GL_LINES, 0, 4)
+    glDrawArrays(GL_POINTS, 0, 4)
+#    glutSwapBuffers()
+    glFlush()
+
 
 def data_init():
     print("Vertex Shader:\n",vertex_shader)
@@ -79,39 +88,16 @@ def data_init():
     return vao_id, vbo_id, program
 
 if __name__ == "__main__":
-    if not init():
-        print ('GLFW initialization failed')
-        sys.exit(-1)
-    window_hint(CONTEXT_VERSION_MAJOR, 3)
-    window_hint(CONTEXT_VERSION_MINOR, 2)
-    window_hint(OPENGL_PROFILE, OPENGL_CORE_PROFILE)
-    window_hint(OPENGL_FORWARD_COMPAT, GL_TRUE)
-
-    window = create_window(SCREEN_SIZE, SCREEN_SIZE, "Lista 1 - Exercicio 7", None, None)
-    if not window:
-        print ("OpenWindow failed")
-        terminate()
-        sys.exit(-1)
-
-    make_context_current(window)
+    glutInit(sys.argv)
+    glutInitDisplayMode(GLUT_RGBA)
+    glutInitWindowSize(WINDOW_SIZE,WINDOW_SIZE)
+    glutInitContextVersion(3,3)
+    glutInitContextProfile(GLUT_CORE_PROFILE)
+    glutCreateWindow("Lista 1 - Exercício 11")
     vao_id, vbo_id, program = data_init()
 
-    set_mouse_button_callback(window, mouse_callback)
+    glutMouseFunc(mouse_callback)
 
-    running = True
+    glutDisplayFunc(display)
 
-    while running:
-        glClear(GL_COLOR_BUFFER_BIT)
-        
-        glBindVertexArray(vao_id)
-        if(click_count<3):
-            glDrawArrays(GL_POINTS, 0, click_count)
-        else:
-            glDrawArrays(GL_LINES, 0, 4)
-
-        swap_buffers(window)
-        poll_events()
-
-        # If the user has closed the window in anger
-        # then terminate this program
-        running = running and window_should_close(window)==0
+    glutMainLoop()

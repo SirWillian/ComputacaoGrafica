@@ -1,7 +1,7 @@
-from glfw import *
 import numpy as np
 from OpenGL.arrays import ArrayDatatype
 from OpenGL.GL import *
+from OpenGL.GLUT import *
 import sys
 sys.path.append('../../lib')
 
@@ -9,6 +9,7 @@ from Vec3 import Vec3
 from Point import Point
 from ShaderProgram import ShaderProgram
 
+WINDOW_SIZE=512
 
 vertex_shader = open("colored.vert").read()
 fragment_shader = open("colored.frag").read()
@@ -74,36 +75,24 @@ def data_init():
 
     return vao_id, vbo_id, program
 
+def display():
+    glClear(GL_COLOR_BUFFER_BIT)
+        
+    glBindVertexArray(vao_id)
+    glDrawArrays(GL_LINES, 0, 16)
+
+    glutSwapBuffers()
+
 if __name__ == "__main__":
-    if not init():
-        print ('GLFW initialization failed')
-        sys.exit(-1)
-    window_hint(CONTEXT_VERSION_MAJOR, 3)
-    window_hint(CONTEXT_VERSION_MINOR, 2)
-    window_hint(OPENGL_PROFILE, OPENGL_CORE_PROFILE)
-    window_hint(OPENGL_FORWARD_COMPAT, GL_TRUE)
-
-    window = create_window(800, 800, "Lista 1 - Exercicios 1 e 2", None, None)
-    if not window:
-        print ("OpenWindow failed")
-        terminate()
-        sys.exit(-1)
-
-    make_context_current(window)
+    glutInit(sys.argv)
+    glutInitDisplayMode(GLUT_RGBA)
+    glutInitWindowSize(WINDOW_SIZE,WINDOW_SIZE)
+    glutInitContextVersion(3,3)
+    glutInitContextProfile(GLUT_CORE_PROFILE)
+    glutCreateWindow("Lista 1 - Exercícios 1 e 2")
 
     vao_id, vbo_id, program = data_init()
 
-    running = True
+    glutDisplayFunc(display)
 
-    while running:
-        glClear(GL_COLOR_BUFFER_BIT)
-        
-        glBindVertexArray(vao_id)
-        glDrawArrays(GL_LINES, 0, 16)
-
-        swap_buffers(window)
-        poll_events()
-
-        # If the user has closed the window in anger
-        # then terminate this program
-        running = running and window_should_close(window)==0
+    glutMainLoop()
