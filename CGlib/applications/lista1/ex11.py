@@ -58,13 +58,13 @@ def display():
     glClear(GL_COLOR_BUFFER_BIT)
         
     glBindVertexArray(vao_id)
-    #if(click_count<3):
-    #    glDrawArrays(GL_POINTS, 0, click_count)
-    #else:
-    #    glDrawArrays(GL_LINES, 0, 4)
-    glDrawArrays(GL_POINTS, 0, 4)
-#    glutSwapBuffers()
-    glFlush()
+    if(click_count<3):
+        glDrawArrays(GL_POINTS, 0, click_count)
+    else:
+        glDrawArrays(GL_LINES, 0, 4)
+#    glDrawArrays(GL_POINTS, 0, 4)
+    glutSwapBuffers()
+#    glFlush()
 
 
 def data_init():
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     glutInitWindowSize(WINDOW_SIZE,WINDOW_SIZE)
     glutInitContextVersion(3,3)
     glutInitContextProfile(GLUT_CORE_PROFILE)
-    glutCreateWindow("Lista 1 - Exercício 11")
+    glutCreateWindow(b"Lista 1 - Exercicio 11")
     vao_id, vbo_id, program = data_init()
 
     glutMouseFunc(mouse_callback)
