@@ -45,6 +45,7 @@ def mouse_callback(button, state, xc, yc):
                 print("\nu: "+str(u.coordinates)+" v: "+str(v.coordinates))
                 print("Angulo entre u v: "+str(Vec3.angle_between(u,v)))
                 print("u.v = "+str(Vec3.dot(u,v))+" u x v = "+str(Vec3.cross(u,v).coordinates)+"\n")
+                print("Distância de P a v = "+str(Vec3.cross(u,v).norm()/v.norm()))
 
                 glBufferSubData(GL_ARRAY_BUFFER, 0, 12*4, vertex_data)
             print(vertex_data)                

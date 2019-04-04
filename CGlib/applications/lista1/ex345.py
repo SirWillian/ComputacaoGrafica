@@ -12,7 +12,7 @@ v = Vec3(0,2,3)
 w = Vec3(2,4,3)
 
 #Implementar conversão de base
-print("u = 0.5v - 0.5w")
+print("u = 0.5w - 0.5v")
 print("v = w - 2u")
 print("w = 2u + v")
 
