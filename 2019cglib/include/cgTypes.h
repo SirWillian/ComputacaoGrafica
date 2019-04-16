@@ -17,10 +17,10 @@
 
 /* Defines. */
 
-#define X 0
-#define Y 1
-#define Z 2
-
+//#define X 0
+//#define Y 1
+//#define Z 2
+//
 
 /* Types. */
 

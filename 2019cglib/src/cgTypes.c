@@ -10,31 +10,31 @@
 
 void cgPointSet(cgPoint *p, double x, double y, double z)
 {
-	p->coordinates[X] = x;		
-	p->coordinates[Y] = y;		
-	p->coordinates[Z] = z;		
+	p->coordinates[0] = x;		
+	p->coordinates[1] = y;		
+	p->coordinates[2] = z;		
 }
 
 double cgPointGetX(cgPoint p)
 {
-	return p.coordinates[X];		
+	return p.coordinates[0];		
 }
 
 double cgPointGetY(cgPoint p)
 {
-	return p.coordinates[Y];		
+	return p.coordinates[1];		
 }
 
 double cgPointGetZ(cgPoint p)
 {
-	return p.coordinates[Z];		
+	return p.coordinates[2];		
 }
 
 void cgPointSetRand(cgPoint *p)
 {
-	p->coordinates[X] = ((double)rand()/(double)RAND_MAX);		
-	p->coordinates[Y] = ((double)rand()/(double)RAND_MAX);		
-	p->coordinates[Z] = ((double)rand()/(double)RAND_MAX);		
+	p->coordinates[0] = ((double)rand()/(double)RAND_MAX);		
+	p->coordinates[1] = ((double)rand()/(double)RAND_MAX);		
+	p->coordinates[2] = ((double)rand()/(double)RAND_MAX);		
 }
 
 void cgPointPrint(cgPoint p)

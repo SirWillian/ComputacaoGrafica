@@ -11,6 +11,7 @@
 
 #include <cgTypes.h>
 #include <cgPrimitives.h>
+#include <cgImage.h>
 
 
 #endif /* _CG_H_ */
