@@ -58,6 +58,7 @@ def mouse_callback(button, state, xc, yc):
 def display():
     glClear(GL_COLOR_BUFFER_BIT)
         
+    print(vao_id)
     glBindVertexArray(vao_id)
     if(click_count<3):
         glDrawArrays(GL_POINTS, 0, click_count)

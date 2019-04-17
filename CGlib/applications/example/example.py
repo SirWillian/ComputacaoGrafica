@@ -13,17 +13,17 @@ from ShaderProgram import ShaderProgram
 vertex_shader = open("simple.vert").read()
 fragment_shader = open("simple.frag").read()
 
-vertex_data = np.array([0.75, 0.75, 0.0,
-                        0.75, -0.75, 0.0,
-                        -0.75, -0.75, 0.0], dtype=np.float32)
+vertex_data = np.array([0.75, 0.75, 0.0, 1.0,
+                        0.75, -0.75, 0.0, 1.0,
+                        -0.75, -0.75, 0.0, 1.0], dtype=np.float32)
 
 vertex_data2 = np.array([Point(0.75, 0.75, 0.0),
                          Point(0.75, -0.75, 0.0),
                          Point(-0.5, -0.75, 0.0)])
 
-color_data = np.array([1, 0, 0,
-                        0, 1, 0,
-                        0, 0, 1], dtype=np.float32)
+color_data = np.array([1, 0, 0, 1,
+                        0, 1, 0, 1,
+                        0, 0, 1, 1], dtype=np.float32)
 
 def key_callback(key, action):
     """ Sample keyboard callback function """
@@ -52,22 +52,22 @@ def data_init():
     glBindBuffer(GL_ARRAY_BUFFER, vbo_id[0])
 
     # Now go ahead and fill this bound buffer with some data
-    vertex_data3=np.array([point.coordinates for point in vertex_data2],dtype=np.float32).ravel()
-    glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(vertex_data3), vertex_data3, GL_STATIC_DRAW)
+    #vertex_data3=np.array([point.coordinates for point in vertex_data2],dtype=np.float32).ravel()
+    glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(vertex_data), vertex_data, GL_STATIC_DRAW)
 
     pos_attrib = program.attribute_location('vPosition')
     # Turn on this vertex attribute in the shader
     glEnableVertexAttribArray(pos_attrib)
     # Now specify how the shader program will be receiving this data
     # In this case the data from this buffer will be available in the shader as the vPosition vertex attribute
-    glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, None)
+    glVertexAttribPointer(pos_attrib, 4, GL_FLOAT, GL_FALSE, 0, None)
 
     # Now do the same for the other vertex buffer
     color_attrib = program.attribute_location('vInColor')
     glEnableVertexAttribArray(color_attrib)
     glBindBuffer(GL_ARRAY_BUFFER, vbo_id[1])
     glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(color_data), color_data, GL_STATIC_DRAW)
-    glVertexAttribPointer(color_attrib, 3, GL_FLOAT, GL_FALSE, 0, None)
+    glVertexAttribPointer(color_attrib, 4, GL_FLOAT, GL_FALSE, 0, None)
 
     # Lets unbind our vbo and vao state
     # We will bind these again in the draw loop
