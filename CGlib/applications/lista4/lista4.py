@@ -5,13 +5,22 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 import glm
 import sys
+from math import cos, sin, pi
 from ShaderProgram import ShaderProgram
 
 
 # Globals
 VAO = VBO = CBO = 0
+program_id = 0
 vertex_shader = open("simple3.vert").read()
 fragment_shader = open("simple3.frag").read()
+
+object_transform = 0
+view_origin = glm.vec3(0,0,-1)
+yaw = pi/2
+pitch = pi/2
+view_matrix = glm.lookAt(view_origin, view_origin + glm.vec3(0,0,1), glm.vec3(0,1,0))
+perspective_matrix = glm.perspective(glm.radians(110), 1, 0.1, 100)
 
 def process_arguments(args):
     arg_pos = 1
@@ -48,8 +57,44 @@ def process_arguments(args):
             
 
 def Keyboard(key, x, y):
+    global view_origin, view_matrix
+    
+    forward_vector = glm.vec3(cos(yaw)*sin(pitch), cos(pitch), sin(yaw)*sin(pitch))
+    right_vector = glm.normalize(glm.cross(glm.vec3(0,1,0),forward_vector))
     if(key==27 or key == b'q' or key == b'Q'):
         sys.exit(0)
+    elif(key==b'd'):
+        view_origin+=right_vector*-0.1
+    elif(key==b'a'):
+        view_origin+=right_vector*0.1
+    elif(key==b'w'):
+        view_origin+=forward_vector*0.1
+    elif(key==b's'):
+        view_origin+=forward_vector*-0.1
+    elif(key==b' '):
+        view_origin+=glm.vec3(0,0.1,0)
+    elif(key==b'c'):
+        view_origin+=glm.vec3(0,-0.1,0)
+    
+    view_matrix = glm.lookAt(view_origin, view_origin + forward_vector, glm.vec3(0,1,0))
+    glutPostRedisplay()
+
+def SpecialKeys(key, x, y):
+    global yaw, pitch, view_matrix
+
+    if(key==GLUT_KEY_LEFT):
+        yaw-=0.0525
+    elif(key==GLUT_KEY_RIGHT):
+        yaw+=0.0525
+    elif(key==GLUT_KEY_UP and pitch > 0.0525):
+        pitch-=0.0525
+    elif(key==GLUT_KEY_DOWN and pitch < pi-0.0525):
+        pitch+=0.0525
+    
+    forward_vector = glm.vec3(cos(yaw)*sin(pitch), cos(pitch), sin(yaw)*sin(pitch))
+    view_matrix = glm.lookAt(view_origin, view_origin + forward_vector, glm.vec3(0,1,0))
+    glutPostRedisplay()
+        
 
 def Init():
     global VAO, VBO, CBO
@@ -146,26 +191,32 @@ def Init():
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(1)
     
+    global program_id
     program = ShaderProgram(vertex_shader, fragment_shader)
-    glUseProgram(program.program_id)
+    program_id = program.program_id
+    glUseProgram(program_id)
 
-    trans = process_arguments(sys.argv)
+    global object_transform
+    object_transform = process_arguments(sys.argv)
     print("Transformações combinadas")
-    print(trans)
-    
-    transformLoc = glGetUniformLocation(program.program_id, "transform")
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm.value_ptr(trans))
+    print(object_transform)
             
     glEnable(GL_DEPTH_TEST)
 
 
 def Display():
+    global perspective_matrix, object_transform, view_matrix, program_id
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+    transform = perspective_matrix * view_matrix * object_transform
+
+    transformLoc = glGetUniformLocation(program_id, "transform")
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm.value_ptr(transform))
 
     glBindVertexArray(VAO)
     glDrawArrays(GL_TRIANGLES, 0, 12*3);
-    #glDrawArrays(GL_POINTS, 0, 36)
-
+    
     glutSwapBuffers()
 
 
@@ -179,6 +230,7 @@ if __name__ == "__main__":
 
     Init()
     glutKeyboardFunc(Keyboard)
+    glutSpecialFunc(SpecialKeys)
     glutDisplayFunc(Display)
 
     glutMainLoop()
