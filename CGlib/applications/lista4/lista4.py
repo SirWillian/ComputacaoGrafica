@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import numpy as np
 from OpenGL.arrays import ArrayDatatype
 from OpenGL.GL import *
@@ -16,11 +16,11 @@ vertex_shader = open("simple3.vert").read()
 fragment_shader = open("simple3.frag").read()
 
 object_transform = 0
-view_origin = glm.vec3(0,0,-1)
-yaw = pi/2
+view_origin = glm.vec3(1,0,0)
+yaw = 3*pi/2
 pitch = pi/2
-view_matrix = glm.lookAt(view_origin, view_origin + glm.vec3(0,0,1), glm.vec3(0,1,0))
-perspective_matrix = glm.perspective(glm.radians(110), 1, 0.1, 100)
+view_matrix = glm.lookAt(view_origin, glm.vec3(0,0,0), glm.vec3(0,1,0))
+perspective_matrix = glm.perspective(glm.radians(110), 16/9, 0.1, 100)
 
 def process_arguments(args):
     arg_pos = 1
@@ -59,14 +59,14 @@ def process_arguments(args):
 def Keyboard(key, x, y):
     global view_origin, view_matrix
     
-    forward_vector = glm.vec3(cos(yaw)*sin(pitch), cos(pitch), sin(yaw)*sin(pitch))
-    right_vector = glm.normalize(glm.cross(glm.vec3(0,1,0),forward_vector))
+    forward_vector = glm.vec3(sin(yaw)*sin(pitch), cos(pitch), cos(yaw)*sin(pitch))
+    right_vector = glm.normalize(glm.cross(forward_vector,glm.vec3(0,1,0)))
     if(key==27 or key == b'q' or key == b'Q'):
         sys.exit(0)
     elif(key==b'd'):
-        view_origin+=right_vector*-0.1
-    elif(key==b'a'):
         view_origin+=right_vector*0.1
+    elif(key==b'a'):
+        view_origin+=right_vector*-0.1
     elif(key==b'w'):
         view_origin+=forward_vector*0.1
     elif(key==b's'):
@@ -83,15 +83,15 @@ def SpecialKeys(key, x, y):
     global yaw, pitch, view_matrix
 
     if(key==GLUT_KEY_LEFT):
-        yaw-=0.0525
-    elif(key==GLUT_KEY_RIGHT):
         yaw+=0.0525
+    elif(key==GLUT_KEY_RIGHT):
+        yaw-=0.0525
     elif(key==GLUT_KEY_UP and pitch > 0.0525):
         pitch-=0.0525
     elif(key==GLUT_KEY_DOWN and pitch < pi-0.0525):
         pitch+=0.0525
     
-    forward_vector = glm.vec3(cos(yaw)*sin(pitch), cos(pitch), sin(yaw)*sin(pitch))
+    forward_vector = glm.vec3(sin(yaw)*sin(pitch), cos(pitch), cos(yaw)*sin(pitch))
     view_matrix = glm.lookAt(view_origin, view_origin + forward_vector, glm.vec3(0,1,0))
     glutPostRedisplay()
         
@@ -215,7 +215,7 @@ def Display():
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm.value_ptr(transform))
 
     glBindVertexArray(VAO)
-    glDrawArrays(GL_TRIANGLES, 0, 12*3);
+    glDrawArrays(GL_TRIANGLES, 0, 12*3)
     
     glutSwapBuffers()
 
@@ -223,7 +223,7 @@ def Display():
 if __name__ == "__main__":
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH)
-    glutInitWindowSize(512, 512)
+    glutInitWindowSize(1600, 900)
     glutInitContextVersion(3, 3)
     glutInitContextProfile(GLUT_CORE_PROFILE)
     glutCreateWindow(bytes(sys.argv[0], 'utf-8'))
