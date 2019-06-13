@@ -71,45 +71,6 @@ def Init():
     glBindVertexArray(VAO)
 
     vertices = np.array([
-        -0.5,-0.5,-0.5, 1.0,
-        -0.5,-0.5, 0.5, 1.0,
-        -0.5, 0.5, 0.5, 1.0,
-         0.5, 0.5,-0.5, 1.0,
-        -0.5,-0.5,-0.5, 1.0,
-        -0.5, 0.5,-0.5, 1.0,
-         0.5,-0.5, 0.5, 1.0,
-        -0.5,-0.5,-0.5, 1.0,
-         0.5,-0.5,-0.5, 1.0,
-         0.5, 0.5,-0.5, 1.0,
-         0.5,-0.5,-0.5, 1.0,
-        -0.5,-0.5,-0.5, 1.0,
-        -0.5,-0.5,-0.5, 1.0,
-        -0.5, 0.5, 0.5, 1.0,
-        -0.5, 0.5,-0.5, 1.0,
-         0.5,-0.5, 0.5, 1.0,
-        -0.5,-0.5, 0.5, 1.0,
-        -0.5,-0.5,-0.5, 1.0,
-        -0.5, 0.5, 0.5, 1.0,
-        -0.5,-0.5, 0.5, 1.0,
-         0.5,-0.5, 0.5, 1.0,
-         0.5, 0.5, 0.5, 1.0,
-         0.5,-0.5,-0.5, 1.0,
-         0.5, 0.5,-0.5, 1.0,
-         0.5,-0.5,-0.5, 1.0,
-         0.5, 0.5, 0.5, 1.0,
-         0.5,-0.5, 0.5, 1.0,
-         0.5, 0.5, 0.5, 1.0,
-         0.5, 0.5,-0.5, 1.0,
-        -0.5, 0.5,-0.5, 1.0,
-         0.5, 0.5, 0.5, 1.0,
-        -0.5, 0.5,-0.5, 1.0,
-        -0.5, 0.5, 0.5, 1.0,
-         0.5, 0.5, 0.5, 1.0,
-        -0.5, 0.5, 0.5, 1.0,
-         0.5,-0.5, 0.5, 1.0
-    ], dtype=np.float32)
-
-    vertices = np.array([
         -0.5,-0.5,-0.5,
         -0.5,-0.5, 0.5,
         -0.5, 0.5, 0.5,
@@ -186,6 +147,21 @@ def Init():
         0.673, 0.211, 0.457, 1.0,#
         0.673, 0.211, 0.457, 1.0#
     ], dtype=np.float32)
+
+    normals = []
+    
+    # 3 floats per vertex, 3 vertices per triangle
+    for i in range(len(vertices)//9):
+        # For P, Q, R, defined counter-clockwise, glm.cross(R-Q, P-Q)
+        RQ = glm.vec3(vertices[9*i+6]-vertices[9*i+3],vertices[9*i+7]-vertices[9*i+4],vertices[9*i+8]-vertices[9*i+5])
+        PQ = glm.vec3(vertices[9*i]-vertices[9*i+3],vertices[9*i+1]-vertices[9*i+4],vertices[9*i+2]-vertices[9*i+5])
+        normal = glm.normalize(glm.cross(RQ,PQ))
+        # Insert once for each vertex
+        normals.append(normal)
+        normals.append(normal)
+        normals.append(normal)
+
+    print(normals)
 
     VBO = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, VBO)
