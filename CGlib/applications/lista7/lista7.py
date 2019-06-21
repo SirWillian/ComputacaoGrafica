@@ -10,13 +10,13 @@ from ShaderProgram import ShaderProgram
 
 
 # Globals
-VAO = VBO = CBO = 0
+VAO = VBO = NBO = 0
 program_id = 0
 vertex_shader = open("shading.vert").read()
 fragment_shader = open("shading.frag").read()
 
 object_transform = glm.mat4(1)
-view_origin = glm.vec3(1,0,0)
+view_origin = glm.vec3(0,0,1)
 yaw = 3*pi/2
 pitch = pi/2
 view_matrix = glm.lookAt(view_origin, glm.vec3(0,0,0), glm.vec3(0,1,0))
@@ -24,6 +24,7 @@ perspective_matrix = glm.perspective(glm.radians(110), 16/9, 0.1, 100)
 
 lightPos = glm.vec3(1.2,1,2)
 lightColor = glm.vec3(1,1,1)
+objectColor = glm.vec3(1,0.5,0.31)
 
 def Keyboard(key, x, y):
     global view_origin, view_matrix
@@ -66,113 +67,123 @@ def SpecialKeys(key, x, y):
         
 
 def Init():
-    global VAO, VBO, CBO
+    global VAO, VBO, NBO
     VAO = glGenVertexArrays(1)
     glBindVertexArray(VAO)
 
     vertices = np.array([
-        -0.5,-0.5,-0.5,
-        -0.5,-0.5, 0.5,
-        -0.5, 0.5, 0.5,
-         0.5, 0.5,-0.5,
-        -0.5,-0.5,-0.5,
-        -0.5, 0.5,-0.5,
-         0.5,-0.5, 0.5,
-        -0.5,-0.5,-0.5,
-         0.5,-0.5,-0.5,
-         0.5, 0.5,-0.5,
-         0.5,-0.5,-0.5,
-        -0.5,-0.5,-0.5,
-        -0.5,-0.5,-0.5,
-        -0.5, 0.5, 0.5,
-        -0.5, 0.5,-0.5,
-         0.5,-0.5, 0.5,
-        -0.5,-0.5, 0.5,
-        -0.5,-0.5,-0.5,
-        -0.5, 0.5, 0.5,
-        -0.5,-0.5, 0.5,
-         0.5,-0.5, 0.5,
-         0.5, 0.5, 0.5,
-         0.5,-0.5,-0.5,
-         0.5, 0.5,-0.5,
-         0.5,-0.5,-0.5,
-         0.5, 0.5, 0.5,
-         0.5,-0.5, 0.5,
-         0.5, 0.5, 0.5,
-         0.5, 0.5,-0.5,
-        -0.5, 0.5,-0.5,
-         0.5, 0.5, 0.5,
-        -0.5, 0.5,-0.5,
-        -0.5, 0.5, 0.5,
-         0.5, 0.5, 0.5,
-        -0.5, 0.5, 0.5,
-         0.5,-0.5, 0.5
-    ], dtype=np.float32)
+        -0.5, -0.5, -0.5,
+         0.5,  0.5, -0.5,
+         0.5, -0.5, -0.5,
+        -0.5,  0.5, -0.5,
+         0.5,  0.5, -0.5,
+        -0.5, -0.5, -0.5,
 
+        -0.5, -0.5,  0.5,
+         0.5, -0.5,  0.5,
+         0.5,  0.5,  0.5,
+         0.5,  0.5,  0.5,
+        -0.5,  0.5,  0.5,
+        -0.5, -0.5,  0.5,
+
+        -0.5,  0.5,  0.5,
+        -0.5,  0.5, -0.5,
+        -0.5, -0.5, -0.5,
+        -0.5, -0.5, -0.5,
+        -0.5, -0.5,  0.5,
+        -0.5,  0.5,  0.5,
+
+         0.5,  0.5, -0.5,
+         0.5,  0.5,  0.5,
+         0.5, -0.5, -0.5,
+         0.5, -0.5, -0.5,
+         0.5,  0.5,  0.5,
+         0.5, -0.5,  0.5,
+
+        -0.5, -0.5, -0.5,
+         0.5, -0.5, -0.5,
+         0.5, -0.5,  0.5,
+         0.5, -0.5,  0.5,
+        -0.5, -0.5,  0.5,
+        -0.5, -0.5, -0.5,
+
+        -0.5,  0.5, -0.5,
+         0.5,  0.5,  0.5,
+         0.5,  0.5, -0.5,
+        -0.5,  0.5,  0.5,
+         0.5,  0.5,  0.5,
+        -0.5,  0.5, -0.5
+    ],dtype=np.float32)
+		
     colors = np.array([
-        0.014, 0.184, 0.576, 1.0,#
-        0.014, 0.184, 0.576, 1.0,#
-        0.014, 0.184, 0.576, 1.0,#
         0.483, 0.596, 0.789, 1.0,#
         0.483, 0.596, 0.789, 1.0,#
         0.483, 0.596, 0.789, 1.0,#
-        0.676, 0.977, 0.133, 1.0,#
-        0.676, 0.977, 0.133, 1.0,#
-        0.676, 0.977, 0.133, 1.0,#
         0.483, 0.596, 0.789, 1.0,#
         0.483, 0.596, 0.789, 1.0,#
         0.483, 0.596, 0.789, 1.0,#
-        0.014, 0.184, 0.576, 1.0,#
-        0.014, 0.184, 0.576, 1.0,#
-        0.014, 0.184, 0.576, 1.0,#
-        0.676, 0.977, 0.133, 1.0,#
-        0.676, 0.977, 0.133, 1.0,#
-        0.676, 0.977, 0.133, 1.0,#
+
         0.673, 0.211, 0.457, 1.0,#
         0.673, 0.211, 0.457, 1.0,#
         0.673, 0.211, 0.457, 1.0,#
-        0.055, 0.953, 0.042, 1.0,#
-        0.055, 0.953, 0.042, 1.0,#
-        0.055, 0.953, 0.042, 1.0,#
-        0.055, 0.953, 0.042, 1.0,#
-        0.055, 0.953, 0.042, 1.0,#
-        0.055, 0.953, 0.042, 1.0,#
-        0.997, 0.513, 0.064, 1.0,#
-        0.997, 0.513, 0.064, 1.0,#
-        0.997, 0.513, 0.064, 1.0,#
-        0.997, 0.513, 0.064, 1.0,#
-        0.997, 0.513, 0.064, 1.0,#
-        0.997, 0.513, 0.064, 1.0,#
         0.673, 0.211, 0.457, 1.0,#
         0.673, 0.211, 0.457, 1.0,#
-        0.673, 0.211, 0.457, 1.0#
+        0.673, 0.211, 0.457, 1.0,#
+        
+        0.014, 0.184, 0.576, 1.0,#
+        0.014, 0.184, 0.576, 1.0,#
+        0.014, 0.184, 0.576, 1.0,#
+        0.014, 0.184, 0.576, 1.0,#
+        0.014, 0.184, 0.576, 1.0,#
+        0.014, 0.184, 0.576, 1.0,#
+
+        0.055, 0.953, 0.042, 1.0,#
+        0.055, 0.953, 0.042, 1.0,#
+        0.055, 0.953, 0.042, 1.0,#
+        0.055, 0.953, 0.042, 1.0,#
+        0.055, 0.953, 0.042, 1.0,#
+        0.055, 0.953, 0.042, 1.0,#
+        
+        0.676, 0.977, 0.133, 1.0,#
+        0.676, 0.977, 0.133, 1.0,#
+        0.676, 0.977, 0.133, 1.0,#
+        0.676, 0.977, 0.133, 1.0,#
+        0.676, 0.977, 0.133, 1.0,#
+        0.676, 0.977, 0.133, 1.0,#
+        
+        0.997, 0.513, 0.064, 1.0,#
+        0.997, 0.513, 0.064, 1.0,#
+        0.997, 0.513, 0.064, 1.0,#
+        0.997, 0.513, 0.064, 1.0,#
+        0.997, 0.513, 0.064, 1.0,#
+        0.997, 0.513, 0.064, 1.0#
     ], dtype=np.float32)
 
-    normals = []
+    normals = np.array([])
     
     # 3 floats per vertex, 3 vertices per triangle
     for i in range(len(vertices)//9):
         # For P, Q, R, defined counter-clockwise, glm.cross(R-Q, P-Q)
         RQ = glm.vec3(vertices[9*i+6]-vertices[9*i+3],vertices[9*i+7]-vertices[9*i+4],vertices[9*i+8]-vertices[9*i+5])
         PQ = glm.vec3(vertices[9*i]-vertices[9*i+3],vertices[9*i+1]-vertices[9*i+4],vertices[9*i+2]-vertices[9*i+5])
-        normal = glm.normalize(glm.cross(RQ,PQ))
+        normal = glm.cross(RQ,PQ)
         # Insert once for each vertex
-        normals.append(normal)
-        normals.append(normal)
-        normals.append(normal)
+        normals=np.append(normals, [normal.x,normal.y,normal.z]*3)
 
-    print(normals)
+    normals = normals.astype(np.float32)
 
     VBO = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, VBO)
     glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(vertices), vertices, GL_STATIC_DRAW)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(0)
+    #glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*4, 3*4)
+    #glEnableVertexAttribArray(1)
     
-    CBO = glGenBuffers(1)
-    glBindBuffer(GL_ARRAY_BUFFER, CBO)
-    glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(colors), colors, GL_STATIC_DRAW)
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, None)
+    NBO = glGenBuffers(1)
+    glBindBuffer(GL_ARRAY_BUFFER, NBO)
+    glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(normals), normals, GL_STATIC_DRAW)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(1)
     
     global program_id
@@ -190,11 +201,20 @@ def Display():
 
     # Load shader uniforms
     modelLoc = glGetUniformLocation(program_id, "model")
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm.value_ptr(object_transform))
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm.value_ptr(object_transform))
     viewLoc = glGetUniformLocation(program_id, "view")
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm.value_ptr(view_matrix))
     projectionLoc = glGetUniformLocation(program_id, "projection")
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm.value_ptr(perspective_matrix))
+
+    objColorLoc = glGetUniformLocation(program_id, "objectColor")
+    glUniform3fv(objColorLoc, 1, glm.value_ptr(objectColor))
+    lightColorLoc = glGetUniformLocation(program_id, "lightColor")
+    glUniform3fv(lightColorLoc, 1, glm.value_ptr(lightColor))
+    lightPosLoc = glGetUniformLocation(program_id, "lightPos")
+    glUniform3fv(lightPosLoc, 1, glm.value_ptr(lightPos))
+    viewPosLoc = glGetUniformLocation(program_id, "viewPos")
+    glUniform3fv(viewPosLoc, 1, glm.value_ptr(view_origin))
 
     glBindVertexArray(VAO)
     glDrawArrays(GL_TRIANGLES, 0, 12*3);
