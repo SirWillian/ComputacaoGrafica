@@ -11,7 +11,7 @@ from ShaderProgram import ShaderProgram
 from Terrain import Terrain
 
 # OpenGL
-VAO = VBO = CBO = EBO = 0
+meshVAO = arrowsVAO = VBO = CBO = EBO = 0
 program_id = 0
 vertex_shader = open("simple3.vert").read()
 fragment_shader = open("simple3.frag").read()
@@ -19,6 +19,7 @@ fragment_shader = open("simple3.frag").read()
 # Terrain
 terrain=0
 indices=[]
+normals=[]
 
 # Model-View-Projection
 rotation_matrix = glm.mat4(1)
@@ -43,13 +44,13 @@ def Keyboard(key, x, y):
 
     if(key==27 or key == b'q' or key == b'Q'):
         sys.exit(0)
-        
+
     elif(key==b't'):
         key_flags &= 8+TRANSLATION_FLAG
-        key_flags ^= TRANSLATION_FLAG    
+        key_flags ^= TRANSLATION_FLAG
     elif(key==b'r'):
         key_flags &= 8+ROTATION_FLAG
-        key_flags ^= ROTATION_FLAG    
+        key_flags ^= ROTATION_FLAG
     elif(key==b'e'):
         key_flags &= 8+SCALE_FLAG
         key_flags ^= SCALE_FLAG
@@ -75,7 +76,7 @@ def Keyboard(key, x, y):
         elif(key==b'd'):
             scale_vector[2]-=SCALE_STEP
         scale_matrix = glm.scale(glm.mat4(1), scale_vector)
-        
+
     glutPostRedisplay()
 
 def Special(key, x, y):
@@ -100,7 +101,7 @@ def Special(key, x, y):
             rotation_matrix = glm.rotate(rotation_matrix, ROTATION_STEP, [1,0,0])
         elif(key==GLUT_KEY_DOWN):
             rotation_matrix = glm.rotate(rotation_matrix, -ROTATION_STEP, [1,0,0])
-    
+
     elif(key_flags & SCALE_FLAG == SCALE_FLAG):
         if(key==GLUT_KEY_LEFT):
             scale_vector[0]-=SCALE_STEP
@@ -111,13 +112,13 @@ def Special(key, x, y):
         elif(key==GLUT_KEY_DOWN):
             scale_vector[1]-=SCALE_STEP
         scale_matrix = glm.scale(glm.mat4(1), scale_vector)
-        
+
     glutPostRedisplay()
 
 def Init():
-    global VAO, VBO, terrain, perspective_matrix, view_matrix, view_origin, indices
-    VAO = glGenVertexArrays(1)
-    glBindVertexArray(VAO)
+    global meshVAO, arrowsVAO, VBO, terrain, perspective_matrix, view_matrix, view_origin, indices, normals
+    meshVAO = glGenVertexArrays(1)
+    glBindVertexArray(meshVAO)
 
     terrain = Terrain(sys.argv[1])
     vertices = terrain.vertices
@@ -127,7 +128,7 @@ def Init():
     glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(vertices), vertices, GL_STATIC_DRAW)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(0)
-    
+
     colors = vertices+0.3
 
     CBO = glGenBuffers(1)
@@ -154,13 +155,29 @@ def Init():
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(indices), indices, GL_STATIC_DRAW)
 
-    
-    
+
+    arrowsVAO = glGenVertexArrays(1)
+    glBindVertexArray(arrowsVAO)
+
+    normals = terrain.mesh.getTriangleNormalArrows()
+
+    NBO = glGenBuffers(1)
+    glBindBuffer(GL_ARRAY_BUFFER, NBO)
+    glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(normals), normals, GL_STATIC_DRAW)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
+    glEnableVertexAttribArray(0)
+
+    arrowCBO = glGenBuffers(1)
+    glBindBuffer(GL_ARRAY_BUFFER, arrowCBO)
+    glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(normals), np.ones(normals.size), GL_STATIC_DRAW)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, None)
+    glEnableVertexAttribArray(1)
+
     global program_id
     program = ShaderProgram(vertex_shader, fragment_shader)
     program_id = program.program_id
     glUseProgram(program_id)
-            
+
     glEnable(GL_DEPTH_TEST)
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
     glPointSize(1.4)
@@ -177,12 +194,15 @@ def Display():
     transformLoc = glGetUniformLocation(program_id, "transform")
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm.value_ptr(transform))
 
-    glBindVertexArray(VAO)
+    glBindVertexArray(meshVAO)
     if (key_flags & MESH_FLAG == MESH_FLAG):
         glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, None)
     else:
         glDrawArrays(GL_POINTS, 0, terrain.vertices.size//3)
-    
+
+    glBindVertexArray(arrowsVAO)
+    glDrawArrays(GL_LINES, 0, normals.size)
+
     glutSwapBuffers()
 
 
@@ -190,7 +210,7 @@ if __name__ == "__main__":
     if(len(sys.argv)<2):
         print("Usage: ./terreno.py <path to image>")
         sys.exit(0)
-    
+
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH)
     glutInitWindowSize(1366, 768)

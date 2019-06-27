@@ -15,3 +15,12 @@ class Mesh(object):
 
     def getVertexIndices(self):
         return np.array([v.index for tri in self.triangles for v in tri.vertices],dtype=np.uint32)
+
+    def getTriangleNormalArrows(self):
+        normals = np.array([])
+        # Insert the point coordinates and point+normal coordinates
+        for tri in self.triangles:
+            for v in tri.vertices:
+                vCoords=np.array([v.x,v.y,v.z])
+                normals = np.append(normals, np.append(vCoords,vCoords+tri.normal))
+        return normals.astype(np.float32)
