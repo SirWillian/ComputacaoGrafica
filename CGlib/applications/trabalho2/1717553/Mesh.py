@@ -20,7 +20,9 @@ class Mesh(object):
         normals = np.array([])
         # Insert the point coordinates and point+normal coordinates
         for tri in self.triangles:
+            tCenterCoords = np.array([0,0,0])
             for v in tri.vertices:
-                vCoords=np.array([v.x,v.y,v.z])
-                normals = np.append(normals, np.append(vCoords,vCoords+tri.normal))
+                tCenterCoords=tCenterCoords+np.array([v.x,v.y,v.z])
+            tCenterCoords=tCenterCoords/3
+            normals = np.append(normals, np.append(tCenterCoords,tCenterCoords+[coord*0.05 for coord in tri.normal]))
         return normals.astype(np.float32)
