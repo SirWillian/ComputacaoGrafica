@@ -159,7 +159,7 @@ def Init():
     arrowsVAO = glGenVertexArrays(1)
     glBindVertexArray(arrowsVAO)
 
-    normals = terrain.mesh.getTriangleNormalArrows()
+    normals = terrain.mesh.getVertexNormalArrows()
 
     NBO = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, NBO)
