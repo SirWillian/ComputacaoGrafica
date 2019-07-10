@@ -1,4 +1,5 @@
 import glm
+import numpy as np
 
 class Triangle(object):
     def __init__(self,vertices):
@@ -7,4 +8,9 @@ class Triangle(object):
         PQ = glm.vec3(vertices[0].x-vertices[1].x,vertices[0].y-vertices[1].y,vertices[0].z-vertices[1].z)
         RQ = glm.vec3(vertices[2].x-vertices[1].x,vertices[2].y-vertices[1].y,vertices[2].z-vertices[1].z)
         normal = glm.normalize(glm.cross(RQ,PQ))
-        self.normal = [normal.x,normal.y,normal.z]
+        self.normal = np.array([normal.x,normal.y,normal.z])
+
+    def getCentroid(self):
+        return np.array([self.vertices[0].x + self.vertices[1].x + self.vertices[2].x,
+                         self.vertices[0].y + self.vertices[1].y + self.vertices[2].y,
+                         self.vertices[0].z + self.vertices[1].z + self.vertices[2].z])/3

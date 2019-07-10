@@ -169,7 +169,7 @@ def Init():
 
     arrowCBO = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, arrowCBO)
-    glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(normals), np.ones(normals.size), GL_STATIC_DRAW)
+    glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(normals), np.ones(normals.size,dtype=np.float32), GL_STATIC_DRAW)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(1)
 
