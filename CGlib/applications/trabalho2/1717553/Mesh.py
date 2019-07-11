@@ -49,3 +49,14 @@ class Mesh(object):
         arrowLength = 1/(sqrt(len(self.triangles)))
         return np.array([[v.getCoordinates(), v.getCoordinates()+arrowLength*v.normal] \
                         for tri in self.triangles for v in tri.vertices], dtype=np.float32).ravel()
+
+    def getTriangleVertices(self):
+        return np.array([v.getCoordinates() for tri in self.triangles for v in tri.vertices], dtype=np.float32)
+
+    def getTriangleNormals(self):
+        return np.array([[tri.normal]*3 for tri in self.triangles], dtype=np.float32)
+
+    def getVertexNormals(self):
+        # All vertices, without repetition, sorted by index
+        vertices = sorted(list(dict.fromkeys([v for tri in self.triangles for v in tri.vertices])), key=lambda v: v.index)
+        return np.array([v.normal for v in vertices], dtype=np.float32)
