@@ -19,7 +19,8 @@ program_id = 0
 terrain=0
 indices=[]
 normals=[]
-normal_arrows = []
+colors=[]
+normal_arrows=[]
 
 # Model-View-Projection
 rotation_matrix = glm.mat4(1)
@@ -37,6 +38,7 @@ lightPos = glm.vec3(lightRadius*cos(lightAngle),lightHeight,lightRadius*sin(ligh
 lightColor = glm.vec3(1,1,1)
 
 # System flags
+NORMAL_COLORS_FLAG = 128
 LIGHTING_FLAG = 64
 GOURAUD_FLAG = 32
 NORMAL_ARROW_FLAG = 16
@@ -54,7 +56,7 @@ SCALE_STEP = 0.1
 def Keyboard(key, x, y):
     global view_origin, view_matrix, rotation_matrix, scale_vector, scale_matrix, key_flags, lightAngle, lightHeight, lightPos
 
-    untouched_flags = POINTS_FLAG + NORMAL_ARROW_FLAG + GOURAUD_FLAG + LIGHTING_FLAG
+    untouched_flags = POINTS_FLAG + NORMAL_ARROW_FLAG + GOURAUD_FLAG + LIGHTING_FLAG + NORMAL_COLORS_FLAG
 
     if(key==27 or key == b'q' or key == b'Q'):
         sys.exit(0)
@@ -68,6 +70,14 @@ def Keyboard(key, x, y):
     elif(key==b'e'):
         key_flags &= untouched_flags+SCALE_FLAG
         key_flags ^= SCALE_FLAG
+
+    elif(key==b'c' and key_flags & LIGHTING_FLAG == LIGHTING_FLAG):
+        key_flags ^= NORMAL_COLORS_FLAG
+        glBindBuffer(GL_ARRAY_BUFFER, CBO)
+        if (key_flags & NORMAL_COLORS_FLAG == NORMAL_COLORS_FLAG):
+            glBufferSubData(GL_ARRAY_BUFFER, 0, ArrayDatatype.arrayByteCount(normals), normals)
+        else:
+            glBufferSubData(GL_ARRAY_BUFFER, 0, ArrayDatatype.arrayByteCount(colors), colors)
     
     elif(key==b'j'):
         lightAngle+=0.0525
@@ -151,7 +161,7 @@ def SetSystemFlags(mode):
         key_flags = LIGHTING_FLAG + GOURAUD_FLAG
 
 def Init():
-    global meshVAO, arrowsVAO, VBO, terrain, indices, normals, normal_arrows
+    global meshVAO, arrowsVAO, VBO, CBO, terrain, indices, normals, colors, normal_arrows
 
     SetSystemFlags(sys.argv[2])
 
@@ -170,11 +180,11 @@ def Init():
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(0)
 
+    if (key_flags & GOURAUD_FLAG == GOURAUD_FLAG):
+        normals = terrain.mesh.getVertexNormals()
+    else:
+        normals = terrain.mesh.getTriangleNormals()
     if (key_flags & LIGHTING_FLAG == LIGHTING_FLAG):
-        if (key_flags & GOURAUD_FLAG == GOURAUD_FLAG):
-            normals = terrain.mesh.getVertexNormals()
-        else:
-            normals = terrain.mesh.getTriangleNormals()
         NBO = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, NBO)
         glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(normals), normals, GL_STATIC_DRAW)
@@ -185,7 +195,8 @@ def Init():
 
     CBO = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, CBO)
-    glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(colors), colors, GL_STATIC_DRAW)
+    glBufferData(GL_ARRAY_BUFFER, ArrayDatatype.arrayByteCount(colors), None, GL_STATIC_DRAW)
+    glBufferSubData(GL_ARRAY_BUFFER, 0, ArrayDatatype.arrayByteCount(colors), colors)
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(2)
 

@@ -7,11 +7,9 @@ import glm
 class Mesh(object):
     def __init__(self, coordinates):
         self.triangles = []
-        #self.normals = np.array([])
         coords = coordinates.ravel().reshape((coordinates.shape[0]*coordinates.shape[1],coordinates.shape[2]))
         vertices = np.array([Vertex(coords[i],i) for i in range(len(coords))]).reshape(coordinates.shape[0:2])
         vertex_normals = np.array([np.array([0,0,0], dtype=np.float32) for i in range(vertices.size)]).reshape(coordinates.shape)
-        #print(vertices.shape)
 
         width = len(vertices)
         height = len(vertices[0])
@@ -23,14 +21,12 @@ class Mesh(object):
                 vertex_normals[i+1,j] += tri1.normal
                 vertex_normals[i,j+1] += tri1.normal
                 self.triangles.append(tri1)
-                #self.normals = np.append(self.normals,[tri1.normal])
 
                 tri2 = Triangle([vertices[i+1,j],vertices[i+1,j+1],vertices[i,j+1]])
                 vertex_normals[i+1,j] += tri2.normal
                 vertex_normals[i+1,j+1] += tri2.normal
                 vertex_normals[i,j+1] += tri2.normal
                 self.triangles.append(tri2)
-                #self.normals = np.append(self.normals,[tri2.normal])
         for i in range(width):
             for j in range(height):
                 normal = glm.normalize(vertex_normals[i,j])
@@ -42,7 +38,6 @@ class Mesh(object):
 
     def getTriangleNormalArrows(self):
         arrowLength = 1/(sqrt(len(self.triangles)))
-        #print(arrowLength)
         return np.array([[tri.getCentroid(), tri.getCentroid()+arrowLength*tri.normal] for tri in self.triangles],dtype=np.float32).ravel()
     
     def getVertexNormalArrows(self):
