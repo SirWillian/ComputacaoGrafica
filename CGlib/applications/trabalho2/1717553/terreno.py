@@ -7,7 +7,7 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 
 import glm
-from math import cos, sin
+from math import cos, sin, pi
 from ShaderProgram import ShaderProgram
 from Terrain import Terrain
 
@@ -30,11 +30,10 @@ view_matrix = glm.lookAt(view_origin, view_origin+glm.vec3(0,0,-1), glm.vec3(0,1
 perspective_matrix = glm.perspective(glm.radians(90), 16/9, 0.1, 100)
 
 # Lighting
-#lightRadius = 1
-#lightAngle = 0
-#lightHeight = 0
-#lightPos = glm.vec3(lightRadius*cos(lightAngle),lightHeight,lightRadius*sin(lightAngle))
-#lightPos = glm.vec3(0,1,0)
+lightRadius = 1
+lightAngle = pi/2
+lightHeight = 1
+lightPos = glm.vec3(lightRadius*cos(lightAngle),lightHeight,lightRadius*sin(lightAngle))
 lightColor = glm.vec3(1,1,1)
 
 # System flags
@@ -53,7 +52,7 @@ ROTATION_STEP = glm.radians(9)
 SCALE_STEP = 0.1
 
 def Keyboard(key, x, y):
-    global view_origin, view_matrix, rotation_matrix, scale_vector, scale_matrix, key_flags
+    global view_origin, view_matrix, rotation_matrix, scale_vector, scale_matrix, key_flags, lightAngle, lightHeight, lightPos
 
     untouched_flags = POINTS_FLAG + NORMAL_ARROW_FLAG + GOURAUD_FLAG + LIGHTING_FLAG
 
@@ -69,6 +68,16 @@ def Keyboard(key, x, y):
     elif(key==b'e'):
         key_flags &= untouched_flags+SCALE_FLAG
         key_flags ^= SCALE_FLAG
+    
+    elif(key==b'j'):
+        lightAngle+=0.0525
+    elif(key==b'l'):
+        lightAngle-=0.0525
+    elif(key==b'i'):
+        lightHeight+=0.1
+    elif(key==b'k'):
+        lightHeight-=0.1
+    lightPos = glm.vec3(lightRadius*cos(lightAngle),lightHeight,lightRadius*sin(lightAngle))
 
     if(key_flags & TRANSLATION_FLAG == TRANSLATION_FLAG):
         if(key==b'a'):
