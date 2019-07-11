@@ -290,8 +290,8 @@ def Display():
 
 
 if __name__ == "__main__":
-    if(len(sys.argv)<2):
-        print("Usage: ./terreno.py <path to image>")
+    if(len(sys.argv)!=3):
+        print("Usage: ./terreno.py <path to image> <mode>")
         sys.exit(0)
 
     glutInit(sys.argv)
